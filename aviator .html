@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BetX Casino</title>
+<style>
+    body {
+        margin: 0;
+        font-family: 'Poppins', sans-serif;
+        background: radial-gradient(circle at top, #0d0d2b, #1b1b2f);
+        color: #fff;
+        overflow: hidden;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    h1 {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+        background: linear-gradient(90deg, #ffcc00, #ff6600);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 20px rgba(255,204,0,0.6);
+    }
+    .screen { display: none; text-align: center; width: 100%; max-width: 500px; padding: 20px; }
+    .active { display: block; animation: fadeIn 0.4s; }
+    @keyframes fadeIn { from{opacity:0; transform:scale(0.9);} to{opacity:1; transform:scale(1);} }
+    
+    .menu button {
+        width: 100%;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 12px;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        background: linear-gradient(90deg,#ffcc00,#ff6600);
+        color: #000;
+        font-weight: bold;
+        transition: transform 0.2s;
+    }
+    .menu button:hover { transform: scale(1.05); }
+
+    .back-btn {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background: rgba(255,255,255,0.1);
+        border: none;
+        color: #fff;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 8px 12px;
+        border-radius: 10px;
+    }
+
+    /* --- Mines game styles from your code --- */
+    .mine-buttons { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; flex-wrap: wrap; }
+    .mine-buttons button { padding: 8px 12px; border-radius: 8px; border: none; cursor: pointer; background: rgba(255, 204, 0, 0.15); color: #ffcc00; transition: 0.3s; }
+    .mine-buttons button.active { background: #00cc66; color: #fff; box-shadow: 0 0 10px #00ff99; }
+    .casino-container { background: rgba(255,255,255,0.05); border-radius: 20px; padding: 20px; backdrop-filter: blur(15px); }
+    .amount { font-size: 1.2rem; margin-bottom: 15px; color: #ffcc00; font-weight: bold; }
+    .bet-section { display: flex; justify-content: center; margin-bottom: 15px; gap: 10px; }
+    input[type=number] { padding: 10px; border-radius: 5px; border: none; width: 100px; text-align: center; background: rgba(0,0,0,0.5); color: #fff; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px; }
+    .cell { background: rgba(255,255,255,0.08); border-radius: 12px; aspect-ratio: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 2rem; position: relative; overflow: hidden; transition: 0.3s; }
+    .cell span { font-size: 2rem; opacity: 0; transform: scale(0.5); transition: all 0.4s ease; }
+    .cell.safe span { color: #00ff99; text-shadow: 0 0 15px #00ff99; }
+    .cell.mine span { color: #ff4444; text-shadow: 0 0 15px #ff4444; }
+    .cell.opening { animation: breakBox 0.3s forwards; }
+    @keyframes breakBox { 0% { transform: scale(1);} 50% { transform: scale(1.2);} 100% { transform: scale(1);} }
+    .multiplier-box { margin-top: 15px; padding: 10px; background: rgba(0,85,255,0.3); border-radius: 10px; }
+    button.main-btn { margin-top: 10px; padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer; background: linear-gradient(90deg,#ffcc00,#ff6600); color: #000; font-weight: bold; }
+    .win-popup { position: fixed; top: 20%; left: 50%; transform: translateX(-50%); background: linear-gradient(90deg,#00cc66,#00ff99); color: #fff; padding: 20px 30px; border-radius: 20px; font-size: 1.5rem; display: none; }
+
+    /* Withdrawal page */
+    .methods { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .methods button { background: rgba(255,255,255,0.1); padding: 12px; border-radius: 10px; border:none; color: #fff; cursor:pointer; font-weight:bold; }
+    .methods button:hover { background:#00cc66; }
+</style>
+</head>
+<body>
+
+<!-- Home Screen -->
+<div id="homeScreen" class="screen active">
+    <h1>🎰 BetX Casino</h1>
+    <div class="menu">
+        <button onclick="openScreen('minesScreen')">💎 Mines</button>
+        <button onclick="openScreen('aviatorScreen')">✈️ Aviator</button>
+        <button onclick="alert('Deposit feature coming soon!')">💳 Deposit</button>
+        <button onclick="openScreen('withdrawScreen')">🏦 Withdraw</button>
+    </div>
+</div>
+
+<!-- Mines Game -->
+<div id="minesScreen" class="screen">
+    <button class="back-btn" onclick="openScreen('homeScreen')">⬅</button>
+    <h1>💎 Mines Game</h1>
+    <div class="mine-buttons">
+        <button data-mines="1" class="active">1 Mine</button>
+        <button data-mines="2">2 Mines</button>
+        <button data-mines="3">3 Mines</button>
+        <button data-mines="4">4 Mines</button>
+        <button data-mines="5">5 Mines</button>
+    </div>
+    <div class="casino-container">
+        <div class="amount">Account: <span id="accountAmount">1000</span> NPR</div>
+        <div class="bet-section">
+            <input type="number" id="betAmount" value="100" min="1">
+            <button id="startBtn" class="main-btn">Start</button>
+        </div>
+        <div class="grid" id="grid"></div>
+        <div class="multiplier-box">Current Win: <span id="currentWin">0</span> NPR</div>
+        <button id="cashoutBtn" class="main-btn">Cash Out</button>
+    </div>
+</div>
+
+<!-- Aviator Coming Soon -->
+<div id="aviatorScreen" class="screen">
+    <button class="back-btn" onclick="openScreen('homeScreen')">⬅</button>
+    <h1>✈️ Aviator</h1>
+    <p style="font-size:1.5rem;color:#ffcc00;text-shadow:0 0 15px #ffcc00;">🚀 Coming Soon... Stay Tuned!</p>
+</div>
+
+<!-- Withdraw Screen -->
+<div id="withdrawScreen" class="screen">
+    <button class="back-btn" onclick="openScreen('homeScreen')">⬅</button>
+    <h1>🏦 Withdraw</h1>
+    <div class="methods">
+        <button>Esewa</button>
+        <button>Khalti</button>
+        <button>IMEPay</button>
+        <button>Binance</button>
+        <button>PayPal</button>
+        <button>GPay</button>
+        <button>UPI</button>
+        <button>Others</button>
+    </div>
+</div>
+
+<!-- Popup -->
+<div class="win-popup" id="winPopup">💰 Won: <span id="winAmountDisplay">0</span> NPR</div>
+
+<script>
+let account = 1000;
+let currentBet = 0;
+let currentWin = 0;
+let selectedMines = 1;
+let gameActive = false;
+let minePositions = [];
+let revealedCells = 0;
+let multiplierMap = {1:1.5, 2:1.8, 3:2.2, 4:2.6, 5:3};
+
+const accountDisplay = document.getElementById('accountAmount');
+const grid = document.getElementById('grid');
+const cashoutBtn = document.getElementById('cashoutBtn');
+const startBtn = document.getElementById('startBtn');
+const betInput = document.getElementById('betAmount');
+const mineButtons = document.querySelectorAll('.mine-buttons button');
+const currentWinDisplay = document.getElementById('currentWin');
+const winPopup = document.getElementById('winPopup');
+const winAmountDisplay = document.getElementById('winAmountDisplay');
+
+function openScreen(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+mineButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        mineButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedMines = parseInt(btn.dataset.mines);
+    });
+});
+
+startBtn.addEventListener('click', () => {
+    if (gameActive) return; // prevent double start
+    currentBet = parseInt(betInput.value);
+    if (isNaN(currentBet) || currentBet <= 0 || currentBet > account) {
+        alert("Invalid bet!");
+        return;
+    }
+    account -= currentBet;
+    accountDisplay.textContent = account;
+    currentWin = 0;
+    revealedCells = 0;
+    currentWinDisplay.textContent = currentWin;
+    gameActive = true;
+    generateGrid();
+});
+
+function generateGrid() {
+    grid.innerHTML = "";
+    minePositions = [];
+    while (minePositions.length < selectedMines) {
+        let pos = Math.floor(Math.random() * 9);
+        if (!minePositions.includes(pos)) {
+            minePositions.push(pos);
+        }
+    }
+    for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.dataset.index = i;
+        cell.textContent = "◼️";
+        cell.addEventListener('click', handleCellClick);
+        grid.appendChild(cell);
+    }
+}
+
+function handleCellClick(e) {
+    if (!gameActive) return;
+    const cell = e.currentTarget;
+    const index = parseInt(cell.dataset.index);
+    if (cell.classList.contains("opening")) return;
+    cell.classList.add("opening");
+    setTimeout(() => {
+        if (minePositions.includes(index)) {
+            cell.classList.add("mine");
+            cell.innerHTML = "<span>💣</span>";
+            cell.querySelector("span").style.opacity = 1;
+            cell.querySelector("span").style.transform = "scale(1)";
+            gameOver(false);
+        } else {
+            cell.classList.add("safe");
+            cell.innerHTML = "<span>💎</span>";
+            let gem = cell.querySelector("span");
+            setTimeout(() => { gem.style.opacity = 1; gem.style.transform = "scale(1)"; },100);
+            revealedCells++;
+            let multiplier = multiplierMap[selectedMines];
+            currentWin = Math.floor(currentBet * (multiplier * revealedCells));
+            currentWinDisplay.textContent = currentWin;
+        }
+    }, 250);
+}
+
+cashoutBtn.addEventListener('click', () => {
+    if (!gameActive || currentWin <= 0) return;
+    account += currentWin;
+    accountDisplay.textContent = account;
+    showWinPopup(currentWin);
+    gameOver(true);
+});
+
+function gameOver(won) {
+    gameActive = false;
+    if (!won) { currentWin = 0; currentWinDisplay.textContent = currentWin; }
+    const cells = document.querySelectorAll('.cell');
+    minePositions.forEach(pos => {
+        const mineCell = cells[pos];
+        if (!mineCell.classList.contains("safe")) {
+            mineCell.classList.add("opening","mine");
+            mineCell.innerHTML = "<span>💣</span>";
+            let bomb = mineCell.querySelector("span");
+            setTimeout(() => { bomb.style.opacity = 1; bomb.style.transform = "scale(1)"; },200);
+        }
+    });
+}
+
+function showWinPopup(amount) {
+    winAmountDisplay.textContent = amount;
+    winPopup.style.display = "block";
+    setTimeout(() => { winPopup.style.display = "none"; }, 2000);
+}
+</script>
+</body>
+</html>
