@@ -205,7 +205,7 @@ function generateGrid() {
         const cell = document.createElement('div');
         cell.classList.add('cell');
         cell.dataset.index = i;
-        cell.textContent = "◼️";
+        cell.textContent = ". ";
         cell.addEventListener('click', handleCellClick);
         grid.appendChild(cell);
     }
